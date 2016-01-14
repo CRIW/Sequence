@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="Sequence.css">
+    <script type="text/javascript" src="Sequence.js"></script>
+    <title>Sequence</title>
+  </head>
+  <body onload="init();">
+
+
+
+    <div id="controls">
+      <div class="button" id="play">Play</div>
+      <div class="button" id="load">Load</div>
+      <div class="button" id="save">Save</div>
+    </div>
+    <div id="playlist">
+      <span id="playlist-label">
+         Playlist
+      </span>
+      <br/><br/><br/>
+      <div class="track" draggable="true">
+         <div class="track-background"></div>
+         <div class="track-highlight"></div>
+         <div class="track-progressbar">
+            <div class="track-progress"></div>
+         </div>
+         <div class="track-name">Test</div>
+         <div class="track-description">00:00/00:00</div>
+
+      </div>
+    </div>
+    <div id="standby">
+      <span id="playlist-label">
+          Standby
+      </span>
+      <br/><br/><br/>
+    </div>
+
+    <script type="text/javascript">
+      function init(){
+         initAudio();
+         initUploadDrop(document.getElementById("standby"));
+      }
+
+
+
+    </script>
+
+
+
+
+  </body>
+</html>
