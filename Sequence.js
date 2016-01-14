@@ -21,7 +21,8 @@ function initUploadDrop(element){
       document.getElementById('standby').classList.remove('dragActive');
       if(event.dataTransfer.files && (event.dataTransfer.files.length > 0)){
          for(var i = 0; i < event.dataTransfer.files.length; i++){
-            if(event.dataTransfer.files[i].name.endsWith('.mp3')){
+            var cleanName = event.dataTransfer.files[i].name.substring(0, event.dataTransfer.files[i].name.lastIndexOf('.'));
+            if(event.dataTransfer.files[i].name.endsWith('.mp3') && (!sequence.tracks[cleanName])){
                uploadFile(event.dataTransfer.files[i]);
             }
          }
@@ -42,24 +43,23 @@ function uploadFile(file){
    }
    reader.onload = function(e){
       temp.setProgress(e.loaded / e.total);
-      temp.setDescription('upload finished');
-      console.log(e.target.result);
+      temp.setDescription('finishing upload...');
+      var blob = new Blob([e.target.result], {type:"audio/mpeg"});
+      var blobURL = URL.createObjectURL(blob);
+      var audio = new Audio(blobURL);
+      audio.addEventListener('canplaythrough', function(){temp.setDescription('');});
       sequence.tracks[cleanName] = {
-         "DOMNode" : temp
+         "DOMNode" : temp,
+         "blobURL" : blobURL,
+         "audio" : new Audio(blobURL)
       };
-      decodeBuffer(cleanName, e.target.result);
+      temp.setDescription('loading audio...');
+      temp.setProgress(0);
    }
    reader.readAsArrayBuffer(file);
 }
 
-function decodeBuffer(name, buffer){
-   sequence.tracks[name].DOMNode.setDescription('decoding audio');
-   ctx.decodeAudioData(buffer, function(decodedData){
-      sequence.tracks[name].audio = decodedData;
-      sequence.tracks[name].DOMNode.setDescription('');
-      sequence.tracks[name].DOMNode.setProgress(0);
-   });
-}
+
 
 function createTrackElement(name, description){
    /*<div class="track" draggable="true">
