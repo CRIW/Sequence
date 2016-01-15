@@ -1,4 +1,5 @@
 var ctx;
+var DOMplaylist, DOMstandby;
 var sequence = {};
 
 function initAudio(){
@@ -26,8 +27,69 @@ function initUploadDrop(element){
                uploadFile(event.dataTransfer.files[i]);
             }
          }
+      }else if(event.dataTransfer.getData().startsWith('track-')){
+         console.log("track dropped");
+         console.log(event);
       }
    });
+}
+
+function initDropZones(standby, playlist){
+   standby.addEventListener('standby.dragenter', function(event){
+      event.preventDefault();
+      event.stopPropagation();
+      standby.classList.add('dragActive');
+   });
+   standby.addEventListener('dragleave', function(event){
+      console.log("standby.dragleave");
+      event.preventDefault();
+      event.stopPropagation();
+      standby.classList.remove('dragActive');
+   });
+   standby.addEventListener('drop', function(event){
+      console.log("standby.drop");
+      event.preventDefault();
+      event.stopPropagation();
+      standby.classList.remove('dragActive');
+      console.log('standby.drop');
+   });
+   standby.addEventListener('dragend', function(event){
+      console.log("standby.end");
+      event.preventDefault();
+      event.stopPropagation();
+      standby.classList.remove('dragActive');
+   });
+   standby.addEventListener('dragover', function(event){
+      event.preventDefault();
+      return false;
+   });
+   playlist.addEventListener('dragenter', function(event){
+      console.log("playlist.enter");
+      playlist.classList.add('dragActive');
+   });
+   playlist.addEventListener('dragleave', function(event){
+      console.log('playlist.dragleave');
+      event.target.classList.remove('dragActive');
+   });
+   playlist.addEventListener('dragexit', function(event){
+      console.log('playlist.dragexit');
+      event.preventDefault();
+      event.stopPropagation();
+      playlist.classList.remove('dragActive');
+   });
+   playlist.addEventListener('drop', function(event){
+      event.preventDefault();
+      //event.stopPropagation();
+      console.log('playlist.drop');
+      playlist.classList.remove('dragActive');
+      standby.classList.remove('dragActive');
+   });
+   playlist.addEventListener('dragover', function(event){
+      event.preventDefault();
+      return false;
+   });
+   console.log(standby);
+   console.log(playlist);
 }
 
 
@@ -73,6 +135,22 @@ function createTrackElement(name, description){
    </div>*/
    var track = document.createElement('div');
    track.setAttribute('draggable', true);
+   track.id = "track-" + name;
+   track.addEventListener('dragstart', function(event){
+      event.dataTransfer.setData('text/plain', event.target.id);
+      event.dataTransfer.dropEffect = "move";
+   });
+   track.addEventListener('dragend', function(event){
+      console.log('track.end');
+      event.preventDefault();
+   });
+   track.addEventListener('dragover', function(event){
+      event.preventDefault();//Prevent default to allow for drop
+   });
+   track.addEventListener('drop', function(event){
+      console.log('track.drop')
+      console.log(event);
+   })
    track.classList.add('track');
    track.trackbackground = document.createElement('div');
    track.trackbackground.classList.add('track-background');
