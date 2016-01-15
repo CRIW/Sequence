@@ -40,21 +40,8 @@ function initDropZones(standby, playlist){
       event.stopPropagation();
       standby.classList.add('dragActive');
    });
-   standby.addEventListener('dragleave', function(event){
-      console.log("standby.dragleave");
-      event.preventDefault();
-      event.stopPropagation();
-      standby.classList.remove('dragActive');
-   });
    standby.addEventListener('drop', function(event){
       console.log("standby.drop");
-      event.preventDefault();
-      event.stopPropagation();
-      standby.classList.remove('dragActive');
-      console.log('standby.drop');
-   });
-   standby.addEventListener('dragend', function(event){
-      console.log("standby.end");
       event.preventDefault();
       event.stopPropagation();
       standby.classList.remove('dragActive');
@@ -66,16 +53,6 @@ function initDropZones(standby, playlist){
    playlist.addEventListener('dragenter', function(event){
       console.log("playlist.enter");
       playlist.classList.add('dragActive');
-   });
-   playlist.addEventListener('dragleave', function(event){
-      console.log('playlist.dragleave');
-      event.target.classList.remove('dragActive');
-   });
-   playlist.addEventListener('dragexit', function(event){
-      console.log('playlist.dragexit');
-      event.preventDefault();
-      event.stopPropagation();
-      playlist.classList.remove('dragActive');
    });
    playlist.addEventListener('drop', function(event){
       event.preventDefault();
