@@ -2,6 +2,7 @@ var ctx;
 var DOMplaylist, DOMstandby;
 var sequence = {};
 
+
 function initAudio(){
    ctx = new AudioContext();
    sequence.tracks = {};
@@ -27,14 +28,17 @@ function initUploadDrop(element){
                uploadFile(event.dataTransfer.files[i]);
             }
          }
-      }else if(event.dataTransfer.getData().startsWith('track-')){
+   }else/* if(event.dataTransfer.getData().startsWith('track-'))*/{
          console.log("track dropped");
+         droptarget = element;
          console.log(event);
       }
    });
 }
 
 function initDropZones(standby, playlist){
+    DOMplaylist = playlist;
+    DOMstandby = standby;
    standby.addEventListener('standby.dragenter', function(event){
       event.preventDefault();
       event.stopPropagation();
@@ -58,6 +62,7 @@ function initDropZones(standby, playlist){
       event.preventDefault();
       //event.stopPropagation();
       console.log('playlist.drop');
+      droptarget = event.target;
       playlist.classList.remove('dragActive');
       standby.classList.remove('dragActive');
    });
@@ -86,7 +91,13 @@ function uploadFile(file){
       var blob = new Blob([e.target.result], {type:"audio/mpeg"});
       var blobURL = URL.createObjectURL(blob);
       var audio = new Audio(blobURL);
-      audio.addEventListener('canplaythrough', function(){temp.setDescription('');});
+      
+      audio.addEventListener('canplaythrough', function(){
+          if(audio.duration < 30){ //This is a jingle
+              temp.setHighlightColor(Globals.Colours.Jingle);
+          }
+          temp.setDescription(Helpers.timeToHumanReadable(audio.duration));
+      });
       sequence.tracks[cleanName] = {
          "DOMNode" : temp,
          "blobURL" : blobURL,
@@ -98,6 +109,25 @@ function uploadFile(file){
    reader.readAsArrayBuffer(file);
 }
 
+var droptarget;
+function moveTrack(track){
+    if(droptarget && track){
+        var elem = track.parentNode.removeChild(track);
+        if(droptarget == DOMstandby || droptarget == DOMplaylist){
+            droptarget.appendChild(elem);
+        }else{
+            while(!droptarget.classList.contains('track')){
+                droptarget = droptarget.parentNode;
+            }
+            var realTarget = droptarget.parentNode;
+            realTarget.insertBefore(track,droptarget);
+        }
+    }
+    var tracks = document.querySelectorAll(".track");
+    for(var i = 0; i < tracks.length; i++){
+        tracks[i].classList.remove("track-dragover");
+    }
+}
 
 
 function createTrackElement(name, description){
@@ -113,16 +143,26 @@ function createTrackElement(name, description){
    var track = document.createElement('div');
    track.setAttribute('draggable', true);
    track.id = "track-" + name;
+   track._name = name;
    track.addEventListener('dragstart', function(event){
       event.dataTransfer.setData('text/plain', event.target.id);
       event.dataTransfer.dropEffect = "move";
    });
    track.addEventListener('dragend', function(event){
       console.log('track.end');
+      console.log(event);
+      moveTrack(track);
       event.preventDefault();
    });
    track.addEventListener('dragover', function(event){
+       console.log("track.dragover");
+       track.classList.add("track-dragover");
       event.preventDefault();//Prevent default to allow for drop
+   });
+   track.addEventListener('dragleave',function(event){
+       console.log("track.dragleave");
+       track.classList.remove("track-dragover");
+       event.preventDefault();
    });
    track.addEventListener('drop', function(event){
       console.log('track.drop')
@@ -161,5 +201,14 @@ function createTrackElement(name, description){
    track.setProgress = function(progress){
       this.trackprogress.style.width = parseInt(progress * 100) + "%";
    }
+   track.removeButton = document.createElement('div');
+   track.removeButton.classList.add("track-remove-button");
+   track.removeButton.innerText = "X";
+   track.removeButton.addEventListener("click",function(event){
+       track.remove();
+       delete sequence.tracks[name];
+   });
+   track.appendChild(track.removeButton);
+
    return track;
 }

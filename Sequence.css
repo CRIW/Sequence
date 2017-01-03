@@ -92,6 +92,27 @@ body{
    height: calc(100% - 2.8px);
 }
 
+.track-remove-button{
+   border: 3px solid #454545;
+   font-family: monospace;
+   font-weight: bold;
+   color: red;
+   position:absolute;
+   top: 12.5px;
+   right: 12.5px;
+   height: 20px;
+   width: 20px;
+   line-height: 20px;
+   font-size: 18px;
+   vertical-align: middle;
+   text-align: center;
+}
+
+.track-dragover{
+    border-top: 3px solid #454545;
+    margin-top: 10px;
+}
+
 
 #playlist{
    position: absolute;
