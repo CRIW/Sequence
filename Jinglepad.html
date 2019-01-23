@@ -1,0 +1,295 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <style>
+            body{
+                background-color: #ddd;
+                background: linear-gradient(45deg, #dddddd, #f0f0f0); 
+                font-family: "Roboto", sans-serif;
+            }
+            #pads{
+                min-height: 90vh;
+                min-width: 90vw;
+            }
+            .jingle-container{
+                position: relative;
+                display: inline-block;
+                width: 14em;
+                height: 14em;
+                border: 0.1em solid #555;
+                border-radius: 3px;
+                margin: 0.7em;
+                /*background-color: rgb(170,210,217);*/
+                padding: 0;
+            }
+            .jingle-picture{
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                padding: 0;
+                margin: 0;
+                border-radius: 3px;
+                opacity: 0.25;
+            }
+            .jingle-progressbar{
+                width: 50%;
+                height: 100%;
+                margin: 0;
+                transition: width 0.5s;
+                background-color:rgba(0, 0, 0, 0.17);
+            }
+            .jingle-meta{
+                position: absolute;
+                top: 0;
+                left: 0;
+                padding: 0.5em;
+                line-height: 2.7ex;
+            }
+            .jingle-title{
+                font-size: 120%;
+                line-height: 120%;
+                font-weight: bold;
+            }
+            .jingle-artist{
+                color: #333;
+            }
+            .jingle-album{
+                color: #333;
+            }
+            .jingle-time{
+                position: absolute;
+                bottom: 0;
+                right: 0;
+                padding: 0.5em;
+                font-size: 80%;
+            }
+            .jingle-menu{
+                position: absolute;
+                top: 0;
+                right: 0;
+                padding: 0.5em;
+            }
+            .jingle-button{
+                display: inline-block;
+                border-radius: 3px;
+                width: 1em;
+                height: 1em;
+                padding: 0.1em;
+                margin: 0;
+                line-height: 1em;
+                text-align: center;
+                font-weight: bold;
+            }
+            .jingle-button>svg{
+                width: 100%;
+                height: 100%;
+            }
+            .jingle-button:hover{
+                background-color: rgba(0,0,0,0.17);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="pads" v-on:drop.stop.prevent="filedrop" v-on:dragover.stop.prevent="dragover">
+                <jingle v-for="p in jingles" :jid="p"></jingle>
+        </div>
+        <script type="text/x-template" id="jingle-template">
+            <div class="jingle-container" v-on:click="playpause"  v-bind:style="{backgroundColor: jid.color}" v-on:drop.stop.prevent="filedrop" v-on:dragover.stop.prevent="dragover">
+                <div class="jingle-picture" v-bind:style="{backgroundImage: jid.picture}"></div>
+                <div class="jingle-progressbar" v-bind:style="{width: progress}"></div>
+                <div class="jingle-meta">
+                    <div class="jingle-title">{{jid.title}}</div>
+                    <div class="jingle-artist">{{jid.artist}}</div>
+                    <div class="jingle-album">{{jid.album}}</div>
+                </div>
+                <div class="jingle-time">{{position}} / {{duration}}</div>
+                <div class="jingle-menu">
+                    <!--<div class="jingle-button"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M444.788 291.1l42.616 24.599c4.867 2.809 7.126 8.618 5.459 13.985-11.07 35.642-29.97 67.842-54.689 94.586a12.016 12.016 0 0 1-14.832 2.254l-42.584-24.595a191.577 191.577 0 0 1-60.759 35.13v49.182a12.01 12.01 0 0 1-9.377 11.718c-34.956 7.85-72.499 8.256-109.219.007-5.49-1.233-9.403-6.096-9.403-11.723v-49.184a191.555 191.555 0 0 1-60.759-35.13l-42.584 24.595a12.016 12.016 0 0 1-14.832-2.254c-24.718-26.744-43.619-58.944-54.689-94.586-1.667-5.366.592-11.175 5.459-13.985L67.212 291.1a193.48 193.48 0 0 1 0-70.199l-42.616-24.599c-4.867-2.809-7.126-8.618-5.459-13.985 11.07-35.642 29.97-67.842 54.689-94.586a12.016 12.016 0 0 1 14.832-2.254l42.584 24.595a191.577 191.577 0 0 1 60.759-35.13V25.759a12.01 12.01 0 0 1 9.377-11.718c34.956-7.85 72.499-8.256 109.219-.007 5.49 1.233 9.403 6.096 9.403 11.723v49.184a191.555 191.555 0 0 1 60.759 35.13l42.584-24.595a12.016 12.016 0 0 1 14.832 2.254c24.718 26.744 43.619 58.944 54.689 94.586 1.667 5.366-.592 11.175-5.459 13.985L444.788 220.9a193.485 193.485 0 0 1 0 70.2zM336 256c0-44.112-35.888-80-80-80s-80 35.888-80 80 35.888 80 80 80 80-35.888 80-80z"/></svg></div>
+                    --><div class="jingle-button" v-on:click.stop="remove"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"/></svg></div>
+                </div>
+            </div>
+        </script>
+        <script>
+            window.global_id = 0;
+            window.next_id = () => {let id = window.global_id; window.global_id ++; return id;};
+            var data = {
+                jingles: []
+            };
+
+            let formatTwo = (input) => ('00' + input).slice(-2);
+            let formatTime = t => {
+                let seconds = Math.ceil(t);
+                let minutes = Math.floor(seconds / 60);
+                seconds = Math.ceil(seconds - (minutes * 60));
+                return formatTwo(minutes) + ":" + formatTwo(seconds);
+            }
+
+            Vue.component('jingle', {
+                template: '#jingle-template',
+                props: ['jid'],
+                data: function(){
+                    return {
+                        currentTime: 0,
+                        playing: false,
+                        color: "white",
+                        title: "",
+                    };
+                },
+                mounted: function (){
+                    console.log("created");
+                    this.jid.audio.addEventListener('timeupdate', () => this.currentTime = this.jid.audio.currentTime);
+                    this.jid.audio.addEventListener('ended', () => {this.jid.audio.currentTime = 0; this.playing = false;});
+                    if(!this.jid.picture){
+                        this.jid.color = `hsl(${110 + (Math.random()* 100)}deg,40%,50%)`;
+                    }
+                    this.title = this.jid.title;
+                },
+                beforeUpdate: function(){
+                    if(this.title != this.jid.title){
+                        this.jid.audio.addEventListener('timeupdate', () => this.currentTime = this.jid.audio.currentTime);
+                        this.jid.audio.addEventListener('ended', () => {this.jid.audio.currentTime = 0; this.playing = false;});
+                        if(!this.jid.picture){
+                            this.jid.color = `hsl(${110 + (Math.random()* 100)}deg,40%,50%)`;
+                        }
+                        this.title = this.jid.title;
+                    }
+                },
+                computed: {
+                    duration: function(){
+                       return formatTime(this.jid.audio.duration);
+                    },
+                    position: function(){
+                        return formatTime(this.currentTime);
+                    },
+                    progress: function(){
+                        return ((this.currentTime / this.jid.audio.duration) * 100) + "%";
+                    }
+                },
+                methods:{
+                    playpause: function(){
+                        if(!this.playing){
+                            this.jid.audio.play();
+                            this.playing = true;
+                        }else{
+                            this.jid.audio.pause();
+                            this.jid.audio.currentTime = 0;
+                            this.playing = false;
+                        }
+                    },
+                    remove: function(){
+                        this.jid.audio.pause();
+                        data.jingles = data.jingles.filter(j => j.id != this.jid.id);
+                    },
+                    dragover: function(event){
+                        event.dataTransfer.dropEffect = 'copy';
+                    },
+                    filedrop: function(event){
+                        console.log("filedrop");
+                        let buildjingle = (audio, artist, album, title, duration, picture) => {
+                            let id = window.next_id();
+                            let jingleindex = data.jingles.findIndex(j => j.id == this.jid.id);
+                            this.jid.audio.pause();
+                            data.jingles[jingleindex] = {
+                                id: id,
+                                artist: artist,
+                                album: album,
+                                title: title,
+                                duration: duration,
+                                audio: audio,
+                                picture: picture
+                            };
+                            vm.$forceUpdate();
+                            return id;
+                        }
+                        loadJingle(event, buildjingle);
+                    }
+                }
+
+            });
+
+            
+
+            var vm = new Vue({
+                data: data,
+                el: '#pads',
+                methods: {
+                    dragover: function(event){
+                        event.dataTransfer.dropEffect = 'copy';
+                    },
+                    filedrop: function(event){
+                        let buildjingle = (audio, artist, album, title, duration, picture) => {
+                            let id = window.next_id();
+                            data.jingles.push({
+                                id: id,
+                                artist: artist,
+                                album: album,
+                                title: title,
+                                duration: duration,
+                                audio: audio,
+                                picture: picture
+                            });
+                            return id;
+                        }
+                        loadJingle(event, buildjingle);
+                    }
+                }
+            });
+
+            function loadJingle(event, buildjingle){
+                if(event.dataTransfer && event.dataTransfer.files && event.dataTransfer.files.length > 0){
+                    for(f of event.dataTransfer.files){
+                        if(f.name.endsWith('wav')){
+                            console.log('wav');
+                            var reader = new FileReader();
+                            reader.onload = e => {
+                                console.log("reader done");
+                                var audio = new Audio(e.target.result);
+                                audio.preload = "auto";
+                                audio.addEventListener('loadedmetadata', () => {
+                                    console.log("audio done");
+                                    buildjingle(audio, "","",f.name, audio.duration);
+                                });
+                            }
+                            reader.readAsDataURL(f);
+                            continue;
+                        }
+                        if(!(f.name.endsWith('mp3') || f.name.endsWith('mp4'))) continue;
+
+                        console.log(f.name);
+
+                        jsmediatags.read(f, {
+                            onSuccess: function(tag) {
+                                var reader = new FileReader();
+                                reader.onload = e => {
+                                    console.log("reader done");
+                                    var audio = new Audio(e.target.result);
+                                    audio.preload = "auto";
+                                    console.log(audio);
+                                    audio.addEventListener('loadedmetadata', () => {
+                                        console.log("audio done");
+                                        console.log(tag.tags.picture);
+                                        var imgtag = null;
+                                        if(tag.tags.picture){
+                                            var base64String = "";
+                                            for (var i = 0; i < tag.tags.picture.data.length; i++) {
+                                                base64String += String.fromCharCode(tag.tags.picture.data[i]);
+                                            }
+                                            imgtag = "url(" + "data:" + tag.tags.picture.format + ";base64," + btoa(base64String) + ")";
+                                            console.log(imgtag);
+                                        }
+                                        buildjingle(audio, tag.tags.artist || "",tag.tags.album || "",tag.tags.title || f.name, audio.duration, imgtag);
+                                    });
+                                    audio.load();
+                                }
+                                reader.readAsDataURL(f);
+                            },
+                            onError: function(error) {
+                                console.log(error);
+                            }
+                        });
+                    }
+                }
+            }
+        </script>
+    </body>
+</html>

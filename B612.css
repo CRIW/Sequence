@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'B612';
+    src: url('fonts/B612-Regular.eot');
+    src: url('fonts/B612-Regular.eot?#iefix') format('embedded-opentype'),
+         url('fonts/B612-Regular.woff2') format('woff2'),
+         url('fonts/B612-Regular.woff') format('woff'),
+         url('fonts/B612-Regular.ttf')  format('truetype'),
+         url('fonts/B612-Regular.svg#B612') format('svg');
+}
