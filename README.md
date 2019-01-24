@@ -1,9 +1,5 @@
-# Jinglepad
+# Sequence
 
-[Click Link To Activate](Jinglepad.html)
+[Click Link To Activate](Sequence.html)
 
-Pretty easy drag an drop interface.
-
-Drag songs onto the grey surface or other songs to create samplers.
-
-Click to play, click to stop.
+For the moment, this is just a design sketch.

@@ -1,0 +1,325 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Sequence</title>
+        <link rel="stylesheet" href="B612.css" />
+        <style>
+            body{
+                margin: 0;
+                background-color: #ddd;
+                background: linear-gradient(45deg, #ffffff, #e9e9e9); 
+                font-family: "B612", sans-serif;
+                min-height: 100vh;
+                min-width: 100vw;
+            }
+            #header{
+                padding: 0.2em;
+                background-color:#2f708d;
+                color: white;
+                font-size: 1.5rem;
+                font-weight: bolder;
+                /*border-bottom: 0.1em solid #999;*/
+                margin-bottom: 0.5em;
+                text-align: center;
+                position: relative;
+            }
+            #header-controls{
+                padding: 0.2em;
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                font-size: 1.5rem;
+            }
+            #header-controls > span{
+                display: inline-block;
+                margin-left: 0.2em;
+                width: 1em;
+                text-align: center;
+            }
+            #header-controls > span.active{
+                color: #2f708d;
+                background-color: white;
+                border-radius: 3px;
+            }
+            .item{
+                /*min-height: 5em;*/
+                margin-left: 1.5em;
+                padding: 0.1em;
+                position: relative;
+                background-color: transparent;
+                display: flex;
+                flex-direction: row;
+                margin-bottom: 1em;
+            }
+            .item-bar{
+                position: absolute;
+                top: 0;
+                bottom: -1em;
+                width: 0.5em;
+                display: inline-block;
+            }
+
+            div:first-child > .item-bar{
+                border-top-left-radius: 3px;
+                border-top-right-radius: 3px;
+            }
+
+            div:last-child > .item-bar{
+                border-bottom-left-radius: 3px;
+                border-bottom-right-radius: 3px;
+            }
+            .item-progress{
+                position: absolute;
+                top: 0;
+                left: 0;
+                height:0%;
+                width: 0.5em;
+                background-color: rgba(255,255,255,0.5);
+            }
+            .item-type-song{
+                background-color: #ca032b;
+            }
+            .item-type-jingle{
+                background-color: #2f8d7b;
+            }
+            .item-type-moderation{
+                background-color: #2f418d;
+            }
+
+            .item-time{
+                padding-left: 1.0em;
+                padding-top: 0.3em;
+                color: #555;
+                font-weight: 600;
+                display: inline-block;
+            }
+            .item-container{
+                margin-left: 0.5em;
+                /*border: 0.1em solid #ccc;*/
+                border-radius: 3px;
+                padding: 0.3em;
+                min-width: 50vw;
+                display: flex;
+            }
+            .song-image{
+                background-image: url(example.jpg);
+                background-size: cover;
+                width: 4em;
+                height: 4em;
+                border: 0.1em solid #555;
+                display: inline-block;
+                margin-right: 0.3em;
+            }
+            .stack{
+                display: flex;
+                flex-direction: column;
+            }
+            .song-metadata{
+                font-weight: bold;
+                margin-bottom: 0.2em;
+            }
+            .song-playerinfo{
+                font-size: 80%;
+                color: #111;
+            }
+            .jingle-icon{
+                background-image: url(speaker.svg);
+                background-repeat: no-repeat;
+                background-size: contain;
+                background-position: center;
+                width: 1em;
+                margin-right: 0.3em;
+            }
+            .jingle-name{
+                display: inline-block;
+                height: 1.5em;
+                padding-top: 0.25em;
+                line-height: 1.25em;
+                vertical-align: bottom;
+            }
+            .item-controls{
+                vertical-align: middle;
+                transition: opacity 0.2s;
+                font-size: 150%;
+            }
+            .item-controls > span{
+                opacity: 0;
+            }
+            .item:not(.active):hover > .item-controls > span{
+                opacity: 1;
+            }
+            .item-controls > span{
+                border-radius: 3px;
+                width: 1.25em;
+                text-align:center;
+            }
+            .item.stopafter span.pause{
+                color: #ca032b;
+                opacity: 1;
+            }
+            .item-controls > span:hover{
+                background-color: #ccc;
+            }
+            .item-controls > span:active{
+                background-color: #2f708d;
+                color: white;
+            }
+            .item-controls > span.pause:active{
+                background-color: #ca032b;
+                color: white;
+            }
+
+            .moderation-soundbed{
+                color: #555;
+                margin-bottom: 0.3em;
+            }
+            .moderation-soundbed-title{
+                display: inline-block;
+                padding-left: 0.05em;
+                padding-right: 0.05em;
+            }
+            .moderation-text{
+                padding: 0.3em;
+                font-size: 80%;
+                border: 0.1em dashed #ccc;
+                border-radius: 0.1em;
+            }
+            .addbutton{
+                width: 2em;
+                height: 2em;
+                border-radius: 3px;
+                position: relative;
+                margin-right: 1.5em;
+                transition: background-color 0.15s;
+            }
+            .addbutton > span{
+                height: 1.6em;
+                line-height: 1.6em;
+                font-size: 100%;
+                font-weight: bold;
+                vertical-align: middle;
+                display: inline-block;
+                position: absolute;
+                left: 0.2em;
+                top: 0.2em;
+            }
+            .addbutton:hover{
+                background-color: #ccc;
+            }
+            .addbutton > img{
+                height: 1.6em;
+                width: 50%;
+                position: absolute;
+                right: 0.2em;
+                top: 0.2em;
+            }
+            .addbutton:active{
+                color: white;
+            }
+            .addbutton:active > img{
+                filter: invert(100%);
+            }
+            #add{
+                margin-top: 2em;
+                margin-left: 1.5em;
+                display: flex;
+                flex-direction: row;
+            }
+            #add-song:active{
+                background-color: #ca032b;
+            }
+            #add-jingle:active{
+                background-color: #2f8d7b;
+            }
+            #add-moderation:active{
+                background-color: #2f418d;
+
+            }
+
+        </style>
+    </head>
+    <body>
+        <div id="header">
+            <span contenteditable="true">Header-Style element</span>
+            <div id="header-controls">
+                <span class="active">A</span>
+                <span></span>
+            </div>
+        </div>
+        <div id="seq">
+            <div class="item">
+                <div class="item-bar item-type-song">
+                    <div class="item-progress"></div>
+                </div>
+                <div class="item-time">00:00</div>
+                <div class="item-container">
+                    <div class="song-image"></div>
+                    <div class="stack">
+                        <div class="song-metadata">
+                            Artist - Song (Album)
+                        </div>
+                        <div class="song-playerinfo">00:00/03:41</div>
+                    </div>
+                </div>
+                <div class="item-controls">
+                    <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
+                    <span style="display: inline-block;">▼</span>
+                    <span style="display: inline-block;">🗙</span>
+                    <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                </div>
+            </div>
+            <div class="item active">
+                    <div class="item-bar item-type-jingle">
+                        <div class="item-progress"></div>
+                    </div>
+                    <div class="item-time">
+                        00:00
+                    </div>
+                    <div class="item-container">
+                        <div class="jingle-icon"></div>
+                        <div class="jingle-name">Jingle</div>
+                    </div>
+                    <div class="item-controls">
+                            <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
+                            <span style="display: inline-block;">▼</span>
+                            <span style="display: inline-block;">🗙</span>
+                            <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                    </div>
+            </div>
+            <div class="item stopafter">
+                    <div class="item-bar item-type-moderation">
+                        <div class="item-progress"></div>
+                    </div>
+                    <div class="item-time">
+                        00:00
+                    </div>
+                    <div class="item-container">
+                        <div class="stack">
+                            <div class="moderation-soundbed">(<span class="moderation-soundbed-title">Title of Soundbed</span>)</div>
+                            <div class="moderation-text" contenteditable="true">
+                                This is some text
+                            </div>
+                        </div>
+                    </div>
+                    <div class="item-controls">
+                            <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
+                            <span style="display: inline-block;">▼</span>
+                            <span style="display: inline-block;">🗙</span>
+                            <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                    </div>
+            </div>
+        </div>
+        <div id="add">
+            <div id="add-song" class="addbutton">
+                <span>+</span><img src="note.svg">
+            </div>
+            <div id="add-jingle" class="addbutton">
+                <span>+</span><img src="speaker.svg">
+            </div>
+            <div id="add-moderation" class="addbutton">
+                <span>+</span><img src="file.svg">
+            </div>
+        </div>
+    </body>
+</html>
