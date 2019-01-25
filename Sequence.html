@@ -3,6 +3,8 @@
         <meta charset="utf-8">
         <title>Sequence</title>
         <link rel="stylesheet" href="B612.css" />
+        <script src="vue.js"></script>
+        <script src="jsmediatags.js"></script>
         <style>
             body{
                 margin: 0;
@@ -11,6 +13,13 @@
                 font-family: "B612", sans-serif;
                 min-height: 100vh;
                 min-width: 100vw;
+            }
+            #container{
+                margin: 0;
+                border: none;
+                padding: 0;
+                min-height: 100%;
+                min-width: 100%;
             }
             #header{
                 padding: 0.2em;
@@ -23,17 +32,26 @@
                 text-align: center;
                 position: relative;
             }
-            #header-controls{
+            .header-controlpanel{
                 padding: 0.2em;
-                position: absolute;
-                top: 0;
-                right: 0;
-                bottom: 0;
                 font-size: 1.5rem;
                 display: flex;
                 flex-direction: row;
             }
-            #header-controls > span{
+            #header-load-save{
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+            }
+            #header-controls{
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                
+            }
+            .header-controlpanel > span{
                 display: inline-block;
                 margin-left: 0em;
                 width: 1.25em;
@@ -41,14 +59,14 @@
                 border-radius: 3px;
                 transition: background-color 0.15s;
             }
-            #header-controls > span:hover{
+            .header-controlpanel > span:hover{
                 background-color: rgba(255,255,255,0.3);
             }
-            #header-controls > span:active{
+            .header-controlpanel > span:active{
                 background-color: white;
                 color: #2f708d;
             }
-            #header-controls > span.active{
+            .header-controlpanel > span.active{
                 background-color: white;
                 color: #2f708d;
             }
@@ -250,88 +268,211 @@
         </style>
     </head>
     <body>
-        <div id="header">
-            <span contenteditable="true">Header-Style element</span>
-            <div id="header-controls">
-                <span></span>
-                <span></span>
-                <span class="active"></span>
-                <span></span>
-            </div>
-        </div>
-        <div id="seq">
-            <div class="item">
-                <div class="item-bar item-type-song">
-                    <div class="item-progress"></div>
+        <div id="container">
+            <div id="header">
+                <span contenteditable="true">Header-Style element</span>
+                <div id="header-controls" class="header-controlpanel">
+                    <span></span>
+                    <span></span>
+                    <span class="active"></span>
+                    <span></span>
                 </div>
-                <div class="item-time">00:00</div>
-                <div class="item-container">
-                    <div class="song-image"></div>
-                    <div class="stack">
-                        <div class="song-metadata">
-                            Artist - Song (Album)
+                <div id="header-load-save" class="header-controlpanel">
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+            <div id="seq">
+                <script type="text/x-template" id="song-template">
+                    <div class="item">
+                        <div class="item-bar item-type-song">
+                            <div class="item-progress"></div>
                         </div>
-                        <div class="song-playerinfo">00:00/03:41</div>
-                    </div>
-                </div>
-                <div class="item-controls">
-                    <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
-                    <span style="display: inline-block;">▼</span>
-                    <span style="display: inline-block;">🗙</span>
-                    <span class="pause" style="display: inline-block; font-weight: bold;"></span>
-                </div>
-            </div>
-            <div class="item active">
-                    <div class="item-bar item-type-jingle">
-                        <div class="item-progress"></div>
-                    </div>
-                    <div class="item-time">
-                        00:00
-                    </div>
-                    <div class="item-container">
-                        <div class="jingle-icon"></div>
-                        <div class="jingle-name">Jingle</div>
-                    </div>
-                    <div class="item-controls">
-                            <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
-                            <span style="display: inline-block;">▼</span>
-                            <span style="display: inline-block;">🗙</span>
-                            <span class="pause" style="display: inline-block; font-weight: bold;"></span>
-                    </div>
-            </div>
-            <div class="item stopafter">
-                    <div class="item-bar item-type-moderation">
-                        <div class="item-progress"></div>
-                    </div>
-                    <div class="item-time">
-                        00:00
-                    </div>
-                    <div class="item-container">
-                        <div class="stack">
-                            <div class="moderation-soundbed">(<span class="moderation-soundbed-title">Title of Soundbed</span>)</div>
-                            <div class="moderation-text" contenteditable="true">
-                                This is some text
+                        <div class="item-time">00:00</div>
+                        <div class="item-container">
+                            <div class="song-image"></div>
+                            <div class="stack">
+                                <div class="song-metadata">
+                                    Artist - Song (Album)
+                                </div>
+                                <div class="song-playerinfo">00:00/03:41</div>
                             </div>
                         </div>
-                    </div>
-                    <div class="item-controls">
+                        <div class="item-controls">
                             <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
                             <span style="display: inline-block;">▼</span>
                             <span style="display: inline-block;">🗙</span>
                             <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                        </div>
                     </div>
+                </script>
+                <script type="text/x-template" id="jingle-template">
+                    <div class="item active">
+                        <div class="item-bar item-type-jingle">
+                            <div class="item-progress"></div>
+                        </div>
+                        <div class="item-time">
+                            00:00
+                        </div>
+                        <div class="item-container">
+                            <div class="jingle-icon"></div>
+                            <div class="jingle-name">Jingle</div>
+                        </div>
+                        <div class="item-controls">
+                                <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
+                                <span style="display: inline-block;">▼</span>
+                                <span style="display: inline-block;">🗙</span>
+                                <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                        </div>
+                    </div>
+                </script>
+                <script type="text/x-template" id="moderation-template">
+                    <div class="item stopafter">
+                        <div class="item-bar item-type-moderation">
+                            <div class="item-progress"></div>
+                        </div>
+                        <div class="item-time">
+                            00:00
+                        </div>
+                        <div class="item-container">
+                            <div class="stack">
+                                <div class="moderation-soundbed">(<span class="moderation-soundbed-title">Title of Soundbed</span>)</div>
+                                <div class="moderation-text" contenteditable="true">
+                                    This is some text
+                                </div>
+                            </div>
+                        </div>
+                        <div class="item-controls">
+                                <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
+                                <span style="display: inline-block;">▼</span>
+                                <span style="display: inline-block;">🗙</span>
+                                <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                        </div>
+                    </div>
+                </script>
+            </div>
+            <div id="add">
+                <div id="add-song" class="addbutton" v-on:click="addMedia('song');">
+                    <span>+</span><img src="note.svg">
+                </div>
+                <div id="add-jingle" class="addbutton" v-on:click="addMedia('jingle');">
+                    <span>+</span><img src="speaker.svg">
+                </div>
+                <div id="add-moderation" class="addbutton" v-on:click="addMedia('moderation');">
+                    <span>+</span><img src="file.svg">
+                </div>
             </div>
         </div>
-        <div id="add">
-            <div id="add-song" class="addbutton">
-                <span>+</span><img src="note.svg">
-            </div>
-            <div id="add-jingle" class="addbutton">
-                <span>+</span><img src="speaker.svg">
-            </div>
-            <div id="add-moderation" class="addbutton">
-                <span>+</span><img src="file.svg">
-            </div>
-        </div>
+        <script>
+            //Global id counter for media elements
+            window.global_id = new Date().getTime();
+            window.next_id = () => {let id = window.global_id; window.global_id ++; return id;};
+
+            //String formatting for time
+            let formatTwo = (input) => ('00' + input).slice(-2);
+            let formatTime = t => {
+                let seconds = Math.ceil(t);
+                let minutes = Math.floor(seconds / 60);
+                seconds = Math.ceil(seconds - (minutes * 60));
+                return formatTwo(minutes) + ":" + formatTwo(seconds);
+            };
+
+            //File selection dialog for loading jingles and co
+            var input = document.createElement('input'); 
+            input.type= "file";
+
+            //Buffer for the media elements
+            var media = {}; 
+
+            //VueJS-Buffer
+            var data = { 
+                elements: []
+            };
+
+            //Templates
+            Vue.component('song', {
+                template: '#song-template',
+                props: ['media-id'],
+                data: function(){
+                    return {};
+                }
+            });
+            Vue.component('jingle', {
+                template: '#jingle-template',
+                props: ['media-id'],
+                data: function(){
+                    return {};
+                }
+            });
+            Vue.component('moderation', {
+                template: '#moderation-template',
+                props: ['media-id'],
+                data: function(){
+                    return {};
+                }
+            });
+
+            //Vue Setup
+            var vm = new Vue({
+                data: data,
+                el: '#container',
+                methods: {
+                    addMedia: function(type){
+                        input.onchange = e =>{
+                            if(e.target.files && e.target.files[0]){
+                                createMediaElement(type, e.target.files[0]);
+                            }
+                        }
+                        input.click();
+                    }
+                }
+            });
+
+            //Media loader
+            function createMediaElement(type, file){
+                var t0 = performance.now();
+                //1. Create new media object
+                var media_object = {};
+                media_object.id = window.next_id();
+                //2. Set up basic tags
+                media_object.artist = "";
+                media_object.album = "";
+                media_object.title = file.name;
+                media_object.type = file.type;
+                //3. Start reading tags. If this fails, it's not too bad, we've got backup
+                jsmediatags.read(file, {
+                    onSuccess: function(tag) {
+                        console.log(`tags ${media_object.id} done @${performance.now() -t0}ms`);
+                        media_object.artist = tag.tags.artist;
+                        media_object.album = tag.tags.album;
+                        media_object.title = tag.tags.title;
+                        var imgtag = null;
+                        if(tag.tags.picture){
+                            var base64String = "";
+                            for (var i = 0; i < tag.tags.picture.data.length; i++) {
+                                base64String += String.fromCharCode(tag.tags.picture.data[i]);
+                            }
+                            imgtag = "url(" + "data:" + tag.tags.picture.format + ";base64," + btoa(base64String) + ")";
+                        }
+                        media_object.picture = imgtag;
+                        console.log(`image ${media_object.id} done @${performance.now() -t0}ms`);
+                    }
+                });
+                //4. Read audio into base-64 string and create an audio element from that
+                var reader = new FileReader();
+                reader.onload = e => {
+                    console.log(`reader ${media_object.id} done @${performance.now() -t0}ms`);
+                    media_object.audio = new Audio(e.target.result);
+                    media_object.audio.preload = "auto";
+                    media_object.audio.addEventListener('loadedmetadata', () => {
+                            console.log(`audio ${media_object.id} done @${performance.now() -t0}ms`);
+                            media_object.duration = media_object.audio.duration;
+                            media_object.playing = false;
+                    });
+                    media_object.audio.load();
+                };
+                reader.readAsDataURL(file);
+            }
+        </script>
     </body>
 </html>
