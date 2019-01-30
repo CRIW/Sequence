@@ -283,73 +283,7 @@
                 </div>
             </div>
             <div id="seq">
-                <script type="text/x-template" id="song-template">
-                    <div class="item">
-                        <div class="item-bar item-type-song">
-                            <div class="item-progress"></div>
-                        </div>
-                        <div class="item-time">00:00</div>
-                        <div class="item-container">
-                            <div class="song-image"></div>
-                            <div class="stack">
-                                <div class="song-metadata">
-                                    Artist - Song (Album)
-                                </div>
-                                <div class="song-playerinfo">00:00/03:41</div>
-                            </div>
-                        </div>
-                        <div class="item-controls">
-                            <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
-                            <span style="display: inline-block;">▼</span>
-                            <span style="display: inline-block;">🗙</span>
-                            <span class="pause" style="display: inline-block; font-weight: bold;"></span>
-                        </div>
-                    </div>
-                </script>
-                <script type="text/x-template" id="jingle-template">
-                    <div class="item active">
-                        <div class="item-bar item-type-jingle">
-                            <div class="item-progress"></div>
-                        </div>
-                        <div class="item-time">
-                            00:00
-                        </div>
-                        <div class="item-container">
-                            <div class="jingle-icon"></div>
-                            <div class="jingle-name">Jingle</div>
-                        </div>
-                        <div class="item-controls">
-                                <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
-                                <span style="display: inline-block;">▼</span>
-                                <span style="display: inline-block;">🗙</span>
-                                <span class="pause" style="display: inline-block; font-weight: bold;"></span>
-                        </div>
-                    </div>
-                </script>
-                <script type="text/x-template" id="moderation-template">
-                    <div class="item stopafter">
-                        <div class="item-bar item-type-moderation">
-                            <div class="item-progress"></div>
-                        </div>
-                        <div class="item-time">
-                            00:00
-                        </div>
-                        <div class="item-container">
-                            <div class="stack">
-                                <div class="moderation-soundbed">(<span class="moderation-soundbed-title">Title of Soundbed</span>)</div>
-                                <div class="moderation-text" contenteditable="true">
-                                    This is some text
-                                </div>
-                            </div>
-                        </div>
-                        <div class="item-controls">
-                                <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
-                                <span style="display: inline-block;">▼</span>
-                                <span style="display: inline-block;">🗙</span>
-                                <span class="pause" style="display: inline-block; font-weight: bold;"></span>
-                        </div>
-                    </div>
-                </script>
+                <component v-for="el in elements" v-bind:key="el.media" v-bind:is="el.type" v-bind:element="el" ></component>
             </div>
             <div id="add">
                 <div id="add-song" class="addbutton" v-on:click="addMedia('song');">
@@ -363,6 +297,70 @@
                 </div>
             </div>
         </div>
+        <!-- Templates  -->
+        <script type="text/x-template" id="song-template">
+            <div class="item">
+                <div class="item-bar item-type-song">
+                    <div class="item-progress" v-bind:style="{height: progressHeight}"></div>
+                </div>
+                <div class="item-time">{{duration}}</div>
+                <div class="item-container">
+                    <div class="song-image" v-bind:style="{backgroundImage: element.picture}"></div>
+                    <div class="stack">
+                        <div class="song-metadata">
+                            {{metadata}}
+                        </div>
+                        <div class="song-playerinfo">{{position}}/{{duration}}</div>
+                    </div>
+                </div>
+                <div class="item-controls">
+                    <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
+                    <span style="display: inline-block;">▼</span>
+                    <span style="display: inline-block;">🗙</span>
+                    <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                </div>
+            </div>
+        </script>
+        <script type="text/x-template" id="jingle-template">
+            <div class="item active">
+                <div class="item-bar item-type-jingle">
+                    <div class="item-progress" v-bind:style="{height: progressHeight}"></div>
+                </div>
+                <div class="item-time">{{duration}}</div>
+                <div class="item-container">
+                    <div class="jingle-icon"></div>
+                    <div class="jingle-name">{{metadata}}</div>
+                </div>
+                <div class="item-controls">
+                        <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
+                        <span style="display: inline-block;">▼</span>
+                        <span style="display: inline-block;">🗙</span>
+                        <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                </div>
+            </div>
+        </script>
+        <script type="text/x-template" id="moderation-template">
+            <div class="item stopafter">
+                <div class="item-bar item-type-moderation">
+                    <div class="item-progress" v-bind:style="{height: progressHeight}"></div>
+                </div>
+                <div class="item-time">{{duration}}</div>
+                <div class="item-container">
+                    <div class="stack">
+                        <div class="moderation-soundbed">(<span class="moderation-soundbed-title">{{metadata}}</span>)</div>
+                        <div class="moderation-text" contenteditable="true">
+                        {{element.text}}
+                        </div>
+                    </div>
+                </div>
+                <div class="item-controls">
+                        <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
+                        <span style="display: inline-block;">▼</span>
+                        <span style="display: inline-block;">🗙</span>
+                        <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                </div>
+            </div>
+        </script>
         <script>
             //Global id counter for media elements
             window.global_id = new Date().getTime();
@@ -371,6 +369,7 @@
             //String formatting for time
             let formatTwo = (input) => ('00' + input).slice(-2);
             let formatTime = t => {
+                t = parseInt(t) || 0;
                 let seconds = Math.ceil(t);
                 let minutes = Math.floor(seconds / 60);
                 seconds = Math.ceil(seconds - (minutes * 60));
@@ -392,23 +391,86 @@
             //Templates
             Vue.component('song', {
                 template: '#song-template',
-                props: ['media-id'],
+                props: ['element'],
                 data: function(){
                     return {};
+                },
+                computed: {
+                    duration: function(){
+                        return formatTime(this.element.length);
+                    },
+                    position: function(){
+                        return formatTime(this.element.position);
+                    },
+                    metadata: function(){
+                        var m = this.element.title;
+                        if(this.element.artist){
+                            m = this.element.artist + " - " + m;
+                        }
+                        if(this.element.album){
+                            m = m + " (" + this.element.album + ")";
+                        }
+                        return m;
+                    },
+                    progressHeight: function(){
+                        return parseInt(this.element.progress * 100) + "%";
+                    }
                 }
             });
             Vue.component('jingle', {
                 template: '#jingle-template',
-                props: ['media-id'],
+                props: ['element'],
                 data: function(){
                     return {};
+                },
+                computed: {
+                    duration: function(){
+                        return formatTime(this.element.length);
+                    },
+                    position: function(){
+                        return formatTime(this.element.position);
+                    },
+                    metadata: function(){
+                        var m = this.element.title;
+                        if(this.element.artist){
+                            m = this.element.artist + " - " + m;
+                        }
+                        if(this.element.album){
+                            m = m + " (" + this.element.album + ")";
+                        }
+                        return m;
+                    },
+                    progressHeight: function(){
+                        return parseInt(this.element.progress * 100) + "%";
+                    }
                 }
             });
             Vue.component('moderation', {
                 template: '#moderation-template',
-                props: ['media-id'],
+                props: ['element'],
                 data: function(){
                     return {};
+                },
+                computed: {
+                    duration: function(){
+                        return formatTime(this.element.length);
+                    },
+                    position: function(){
+                        return formatTime(this.element.position);
+                    },
+                    metadata: function(){
+                        var m = this.element.title;
+                        if(this.element.artist){
+                            m = this.element.artist + " - " + m;
+                        }
+                        if(this.element.album){
+                            m = m + " (" + this.element.album + ")";
+                        }
+                        return m;
+                    },
+                    progressHeight: function(){
+                        return parseInt(this.element.progress * 100) + "%";
+                    }
                 }
             });
 
@@ -420,7 +482,22 @@
                     addMedia: function(type){
                         input.onchange = e =>{
                             if(e.target.files && e.target.files[0]){
-                                createMediaElement(type, e.target.files[0]);
+                                let id = createMediaElement(type, e.target.files[0], type == "song");
+                                data.elements.push({
+                                    'type': type,
+                                    'media': id,
+                                    'progress': 0,
+                                    'position': 0,
+                                    'length': 0,
+                                    'active': false,
+                                    'done': false,
+                                    'stopafter': type == 'moderation',
+                                    'userText': type== 'moderation'? 'Enter moderation text here' : '',
+                                    'artist': '',
+                                    'album': '',
+                                    'title': e.target.files[0].name,
+                                    'picture': ''
+                                });
                             }
                         }
                         input.click();
@@ -429,7 +506,8 @@
             });
 
             //Media loader
-            function createMediaElement(type, file){
+            function createMediaElement(type, file, withImage = false){
+                console.log("withImage:" + withImage);
                 var t0 = performance.now();
                 //1. Create new media object
                 var media_object = {};
@@ -447,7 +525,7 @@
                         media_object.album = tag.tags.album;
                         media_object.title = tag.tags.title;
                         var imgtag = null;
-                        if(tag.tags.picture){
+                        if(tag.tags.picture && withImage){
                             var base64String = "";
                             for (var i = 0; i < tag.tags.picture.data.length; i++) {
                                 base64String += String.fromCharCode(tag.tags.picture.data[i]);
@@ -472,7 +550,36 @@
                     media_object.audio.load();
                 };
                 reader.readAsDataURL(file);
+                //Return id
+                media[media_object.id] = media_object;
+                return media_object.id;
             }
+
+            //Metadata updater
+            setInterval(() => {
+                data.elements = data.elements.map(el => {
+                    let m = media[el.media];
+                    el.length = m.duration;
+                    el.position = m.audio.currentTime;
+                    el.progress = 0.5;//m.audio.currentTime / m.audio.duration;
+                    if(m.audio.ended){
+                        el.done = true;
+                        el.active = false;
+                    }
+                    if(el.artist == ''){
+                        el.artist = m.artist;
+                    }
+                    if(el.album == ''){
+                        el.album = m.album;
+                    }
+                    if(el.picture == ''){
+                        el.picture = m.picture;
+                    }
+                    el.title = m.title;
+                    return el;
+                });
+                vm.$forceUpdate();
+            }, 500);
         </script>
     </body>
 </html>
