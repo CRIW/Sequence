@@ -14,6 +14,11 @@
                 min-height: 100vh;
                 min-width: 100vw;
             }
+            textarea{
+                background: none;
+                font-family: "B612", sans-serif;
+                display: inline-block;
+            }
             #container{
                 margin: 0;
                 border: none;
@@ -104,6 +109,7 @@
                 height:0%;
                 width: 0.5em;
                 background-color: rgba(255,255,255,0.5);
+                transition: height 0.3s;
             }
             .item-type-song{
                 background-color: #ca032b;
@@ -264,22 +270,37 @@
                 background-color: #2f418d;
 
             }
+            #save{
+                position: absolute;
+                background: rgba(255,255,255,0.5);
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+                display: none;
+            }
+            #save-text, #downloadlink{
+                margin-top: 25vh;
+                font-size: 300%;
+                text-align: center;
+                height: 100%;
+            }
 
         </style>
     </head>
     <body>
         <div id="container">
             <div id="header">
-                <span contenteditable="true">Header-Style element</span>
+                <span id="title-text" contenteditable="true">{{title}}</span>
                 <div id="header-controls" class="header-controlpanel">
-                    <span></span>
-                    <span></span>
-                    <span class="active"></span>
-                    <span></span>
+                    <span v-on:click="last"></span>
+                    <span v-on:click="stop"></span>
+                    <span v-on:click="playpause" v-bind:class="{active: this.playing}"></span>
+                    <span v-on:click="next"></span>
                 </div>
                 <div id="header-load-save" class="header-controlpanel">
-                    <span></span>
-                    <span></span>
+                    <span v-on:click="load"></span>
+                    <span v-on:click="save"></span>
                 </div>
             </div>
             <div id="seq">
@@ -297,13 +318,19 @@
                 </div>
             </div>
         </div>
+        <div id="save">
+            <div id="save-text">
+                Saving data...
+            </div>
+            <a id="downloadlink" style="display: none">Download</a>
+        </div>
         <!-- Templates  -->
         <script type="text/x-template" id="song-template">
-            <div class="item">
+            <div class="item" v-bind:class="{stopafter: this.element.stopafter}">
                 <div class="item-bar item-type-song">
                     <div class="item-progress" v-bind:style="{height: progressHeight}"></div>
                 </div>
-                <div class="item-time">{{duration}}</div>
+                <div class="item-time">{{timestamp}}</div>
                 <div class="item-container">
                     <div class="song-image" v-bind:style="{backgroundImage: element.picture}"></div>
                     <div class="stack">
@@ -314,50 +341,49 @@
                     </div>
                 </div>
                 <div class="item-controls">
-                    <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
-                    <span style="display: inline-block;">▼</span>
-                    <span style="display: inline-block;">🗙</span>
-                    <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                    <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;" v-on:click="up">▼</span>
+                    <span style="display: inline-block;" v-on:click="down">▼</span>
+                    <span style="display: inline-block;" v-on:click="remove">Χ</span>
+                    <span class="pause" style="display: inline-block; font-weight: bold;" v-on:click="toggleStopafter"></span>
                 </div>
             </div>
         </script>
         <script type="text/x-template" id="jingle-template">
-            <div class="item active">
+            <div class="item" v-bind:class="{stopafter: this.element.stopafter}">
                 <div class="item-bar item-type-jingle">
                     <div class="item-progress" v-bind:style="{height: progressHeight}"></div>
                 </div>
-                <div class="item-time">{{duration}}</div>
+                <div class="item-time">{{timestamp}}</div>
                 <div class="item-container">
                     <div class="jingle-icon"></div>
                     <div class="jingle-name">{{metadata}}</div>
                 </div>
                 <div class="item-controls">
-                        <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
-                        <span style="display: inline-block;">▼</span>
-                        <span style="display: inline-block;">🗙</span>
-                        <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                        <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;" v-on:click="up">▼</span>
+                        <span style="display: inline-block;" v-on:click="down">▼</span>
+                        <span style="display: inline-block;" v-on:click="remove">Χ</span>
+                        <span class="pause" style="display: inline-block; font-weight: bold;" v-on:click="toggleStopafter"></span>
                 </div>
             </div>
         </script>
         <script type="text/x-template" id="moderation-template">
-            <div class="item stopafter">
+            <div class="item" v-bind:class="{stopafter: this.element.stopafter}">
                 <div class="item-bar item-type-moderation">
                     <div class="item-progress" v-bind:style="{height: progressHeight}"></div>
                 </div>
-                <div class="item-time">{{duration}}</div>
+                <div class="item-time">{{timestamp}}</div>
                 <div class="item-container">
                     <div class="stack">
                         <div class="moderation-soundbed">(<span class="moderation-soundbed-title">{{metadata}}</span>)</div>
-                        <div class="moderation-text" contenteditable="true">
-                        {{element.text}}
-                        </div>
+                        <textarea class="moderation-text" v-model="element.text" placeholder="enter moderation text here">
+                        </textarea>
                     </div>
                 </div>
                 <div class="item-controls">
-                        <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;">▼</span>
-                        <span style="display: inline-block;">▼</span>
-                        <span style="display: inline-block;">🗙</span>
-                        <span class="pause" style="display: inline-block; font-weight: bold;"></span>
+                        <span style="display: inline-block; transform:rotate(-180deg); height: 1.25em;" v-on:click="up">▼</span>
+                        <span style="display: inline-block;" v-on:click="down">▼</span>
+                        <span style="display: inline-block;" v-on:click="remove">Χ</span>
+                        <span class="pause" style="display: inline-block; font-weight: bold;" v-on:click="toggleStopafter"></span>
                 </div>
             </div>
         </script>
@@ -385,7 +411,10 @@
 
             //VueJS-Buffer
             var data = { 
-                elements: []
+                elements: [],
+                currentItem: 0,
+                playing: false,
+                title: "Title"
             };
 
             //Templates
@@ -396,6 +425,13 @@
                     return {};
                 },
                 computed: {
+                    timestamp: function(){
+                        var t = 0;
+                        for(var i = 0; i < data.elements.findIndex(e => e.media == this.element.media); i++){
+                            t += data.elements[i].length;
+                        }
+                        return formatTime(t);
+                    },
                     duration: function(){
                         return formatTime(this.element.length);
                     },
@@ -410,10 +446,47 @@
                         if(this.element.album){
                             m = m + " (" + this.element.album + ")";
                         }
+                        if(!m || m.trim() == ""){
+                            m = media[this.element.media].filename;
+                        }
                         return m;
                     },
                     progressHeight: function(){
                         return parseInt(this.element.progress * 100) + "%";
+                    }
+                },
+                methods:{
+                    up: function(){
+                        var index = data.elements.findIndex(e => e.media == this.element.media);
+                        if(index > 0){
+                            var temp = data.elements[index -1];
+                            data.elements[index - 1] = data.elements[index];
+                            data.elements[index] = temp;
+                            vm.$forceUpdate();
+                        }
+                    },
+                    down: function(){
+                        var index = data.elements.findIndex(e => e.media == this.element.media);
+                        if(index < data.elements.length - 1){
+                            var temp = data.elements[index  + 1];
+                            data.elements[index + 1] = data.elements[index];
+                            data.elements[index] = temp;
+                            vm.$forceUpdate();
+                        }
+                    },
+                    remove: function(){
+                        var id = this.element.media;
+                        var index = data.elements.findIndex(e => e.media == this.element.media);
+                        media[this.element.media].audio.pause();
+                        data.elements = data.elements.filter(el => el.media != id);
+                        delete media[id];
+                        if(data.currentItem == index){
+                            vm.playpause();
+                            vm.playpause();
+                        }
+                    },
+                    toggleStopafter: function(){
+                        this.element.stopafter = !this.element.stopafter;
                     }
                 }
             });
@@ -424,6 +497,13 @@
                     return {};
                 },
                 computed: {
+                    timestamp: function(){
+                        var t = 0;
+                        for(var i = 0; i < data.elements.findIndex(e => e.media == this.element.media); i++){
+                            t += data.elements[i].length;
+                        }
+                        return formatTime(t);
+                    },
                     duration: function(){
                         return formatTime(this.element.length);
                     },
@@ -438,10 +518,47 @@
                         if(this.element.album){
                             m = m + " (" + this.element.album + ")";
                         }
+                        if(!m || m.trim() == ""){
+                            m = media[this.element.media].filename;
+                        }
                         return m;
                     },
                     progressHeight: function(){
                         return parseInt(this.element.progress * 100) + "%";
+                    }
+                },
+                methods:{
+                    up: function(){
+                        var index = data.elements.findIndex(e => e.media == this.element.media);
+                        if(index > 0){
+                            var temp = data.elements[index -1];
+                            data.elements[index - 1] = data.elements[index];
+                            data.elements[index] = temp;
+                            vm.$forceUpdate();
+                        }
+                    },
+                    down: function(){
+                        var index = data.elements.findIndex(e => e.media == this.element.media);
+                        if(index < data.elements.length - 1){
+                            var temp = data.elements[index  + 1];
+                            data.elements[index + 1] = data.elements[index];
+                            data.elements[index] = temp;
+                            vm.$forceUpdate();
+                        }
+                    },
+                    remove: function(){
+                        var id = this.element.media;
+                        var index = data.elements.findIndex(e => e.media == this.element.media);
+                        media[this.element.media].audio.pause();
+                        data.elements = data.elements.filter(el => el.media != id);
+                        delete media[id];
+                        if(data.currentItem == index){
+                            vm.playpause();
+                            vm.playpause();
+                        }
+                    },
+                    toggleStopafter: function(){
+                        this.element.stopafter = !this.element.stopafter;
                     }
                 }
             });
@@ -452,6 +569,13 @@
                     return {};
                 },
                 computed: {
+                    timestamp: function(){
+                        var t = 0;
+                        for(var i = 0; i < data.elements.findIndex(e => e.media == this.element.media); i++){
+                            t += data.elements[i].length;
+                        }
+                        return formatTime(t);
+                    },
                     duration: function(){
                         return formatTime(this.element.length);
                     },
@@ -466,10 +590,47 @@
                         if(this.element.album){
                             m = m + " (" + this.element.album + ")";
                         }
+                        if(!m || m.trim() == ""){
+                            m = media[this.element.media].filename;
+                        }
                         return m;
                     },
                     progressHeight: function(){
                         return parseInt(this.element.progress * 100) + "%";
+                    }
+                },
+                methods:{
+                    up: function(){
+                        var index = data.elements.findIndex(e => e.media == this.element.media);
+                        if(index > 0){
+                            var temp = data.elements[index -1];
+                            data.elements[index - 1] = data.elements[index];
+                            data.elements[index] = temp;
+                            vm.$forceUpdate();
+                        }
+                    },
+                    down: function(){
+                        var index = data.elements.findIndex(e => e.media == this.element.media);
+                        if(index < data.elements.length - 1){
+                            var temp = data.elements[index  + 1];
+                            data.elements[index + 1] = data.elements[index];
+                            data.elements[index] = temp;
+                            vm.$forceUpdate();
+                        }
+                    },
+                    remove: function(){
+                        var id = this.element.media;
+                        var index = data.elements.findIndex(e => e.media == this.element.media);
+                        media[this.element.media].audio.pause();
+                        data.elements = data.elements.filter(el => el.media != id);
+                        delete media[id];
+                        if(data.currentItem == index){
+                            vm.playpause();
+                            vm.playpause();
+                        }
+                    },
+                    toggleStopafter: function(){
+                        this.element.stopafter = !this.element.stopafter;
                     }
                 }
             });
@@ -489,8 +650,6 @@
                                     'progress': 0,
                                     'position': 0,
                                     'length': 0,
-                                    'active': false,
-                                    'done': false,
                                     'stopafter': type == 'moderation',
                                     'userText': type== 'moderation'? 'Enter moderation text here' : '',
                                     'artist': '',
@@ -501,13 +660,128 @@
                             }
                         }
                         input.click();
+                    },
+                    last: function(event){
+                        var item = this.elements[this.currentItem];
+                        media[item.media].audio.pause();
+                        media[item.media].audio.currentTime = 0;
+                        if(this.currentItem > 0){
+                            this.currentItem --;
+                        }
+                        var item = this.elements[this.currentItem];
+                        if(this.playing){
+                            media[item.media].audio.play();
+                        }
+                    },
+                    next: function(event){
+                        //Something bugs out if the next element is the last one. No idea what.
+                        var item = this.elements[this.currentItem];
+                        media[item.media].audio.pause();
+                        media[item.media].audio.currentTime = media[item.media].audio.duration || media[item.media].duration || 0;
+                        if(this.currentItem < this.elements.length - 1){
+                            this.currentItem ++;
+                            var item = this.elements[this.currentItem];
+                            if(this.playing){
+                                media[item.media].audio.play();
+                            }
+                        }else{
+                            this.playing = false;
+                            for (item of data.elements){
+                                media[item.media].audio.pause();
+                                media[item.media].audio.currentTime = 0;
+                            }
+                            this.currentItem = 0;
+                        }
+                    },
+                    stop: function(event){
+                        this.playing = false;
+                        for (item of this.elements){
+                            media[item.media].audio.pause();
+                            media[item.media].audio.currentTime = 0;
+                        }
+                        this.currentItem = 0;
+                    },
+                    playpause: function(event){
+                        if(this.playing == false){
+                            var item = this.elements[this.currentItem];
+                            media[item.media].audio.play();
+                            this.playing = true;
+                        }else{
+                            var item = this.elements[this.currentItem];
+                            media[item.media].audio.pause();
+                            this.playing = false;
+                        }
+                    },
+                    setFillTo: function(index){
+                        for(var i = 0; i < index && i < data.elements.length; i++){
+                            media[item.media].audio.currentTime = media[item.media].audio.duration;
+                        }
+                        for(var i = index + 1; i <data.elements.length; i++){
+                            media[item.media].audio.pause();
+                            media[item.media].audio.currentTime = 0;
+                        }
+                    },
+                    save: function(index){
+                        if(this.playing){
+                            vm.playpause();
+                        }
+                        document.getElementById('save').style.display = 'block';
+                        setTimeout(() => {
+                            var save_object ={
+                                title: document.getElementById('title-text').innerText,
+                                elements: data.elements,
+                                media: media
+                            }
+                            var str = JSON.stringify(save_object,(k,v) => {if(k == "audio"){return v.src;} else{return v;}}, 4);
+                            var arr = new Uint8Array(str.length);
+                            for(var i = 0; i < str.length; i++){
+                                arr[i] = str.charCodeAt(i);
+                            }
+
+                            var blob = new Blob([arr], {
+                                type: 'application/javascript'
+                            });
+                            var url = URL.createObjectURL(blob);
+                            //console.log(str);
+                            var a = document.getElementById('downloadlink');
+                            a.href = url;
+                            a.setAttribute('download', save_object.title + ".json");
+                            a.click();
+                            document.getElementById('save').style.display = 'none';
+                            
+                        }, 100);
+                        
+                    },
+                    load: function(){
+                        var input = document.createElement('input');
+                        input.setAttribute('type',"file");
+                        input.setAttribute('accept', "application/json");
+                        input.onchange = e => {
+                            if(e.target.files.length > 0){
+                                var f = e.target.files[0];
+                                var reader = new FileReader();
+                                reader.onload = e => {
+                                    var filecontent = e.target.result;
+                                    var json = JSON.parse(filecontent);
+                                    data.title = json.title;
+                                    data.elements = json.elements;
+                                    media = {};
+                                    for (m in json.media){
+                                        media[m] = json.media[m];
+                                        media[m].audio = new Audio(json.media[m].audio);
+                                    }
+                                    vm.$forceUpdate();
+                                }
+                                reader.readAsText(f);
+                            }
+                        };
+                        input.click();
                     }
                 }
             });
 
             //Media loader
             function createMediaElement(type, file, withImage = false){
-                console.log("withImage:" + withImage);
                 var t0 = performance.now();
                 //1. Create new media object
                 var media_object = {};
@@ -517,6 +791,15 @@
                 media_object.album = "";
                 media_object.title = file.name;
                 media_object.type = file.type;
+                media_object.filename = file.name;
+                //2.1 Prefill audio with placeholder
+                media_object.audio = {
+                    duration: 0,
+                    currentTime: 0,
+                    play: function(){},
+                    pause: function(){},
+                    ended: false
+                }
                 //3. Start reading tags. If this fails, it's not too bad, we've got backup
                 jsmediatags.read(file, {
                     onSuccess: function(tag) {
@@ -543,9 +826,10 @@
                     media_object.audio = new Audio(e.target.result);
                     media_object.audio.preload = "auto";
                     media_object.audio.addEventListener('loadedmetadata', () => {
-                            console.log(`audio ${media_object.id} done @${performance.now() -t0}ms`);
-                            media_object.duration = media_object.audio.duration;
-                            media_object.playing = false;
+                    console.log(`audio ${media_object.id} done @${performance.now() -t0}ms`);
+                    media_object.duration = media_object.audio.duration;
+                    media_object.playing = false;
+                    media_object.currentTime = 0;
                     });
                     media_object.audio.load();
                 };
@@ -561,10 +845,10 @@
                     let m = media[el.media];
                     el.length = m.duration;
                     el.position = m.audio.currentTime;
-                    el.progress = 0.5;//m.audio.currentTime / m.audio.duration;
+                    el.progress = m.audio.currentTime / m.audio.duration;
                     if(m.audio.ended){
-                        el.done = true;
-                        el.active = false;
+                        //TODO: Start next element
+                        //el.active = false;
                     }
                     if(el.artist == ''){
                         el.artist = m.artist;
@@ -579,7 +863,34 @@
                     return el;
                 });
                 vm.$forceUpdate();
-            }, 500);
+            }, 250);
+
+            //Song end watcher
+            setInterval(() => {
+                if(data.elements.length > 0){
+                    var currentElement = data.elements[data.currentItem];
+                    var stopafter = currentElement.stopafter;
+                    if(media[currentElement.media].audio.duration - media[currentElement.media].audio.currentTime < 0.1){
+                        if(data.currentItem < data.elements.length - 1){
+                            data.currentItem ++;
+                            var item = data.elements[data.currentItem];
+                            if(data.playing && !stopafter){
+                                media[item.media].audio.play();
+                            }
+                            if(stopafter){
+                                data.playing =false;
+                            }
+                        }else{
+                            data.playing = false;
+                            for (item of data.elements){
+                                media[item.media].audio.pause();
+                                media[item.media].audio.currentTime = 0;
+                            }
+                            data.currentItem = 0;
+                        }
+                    }
+                }
+            }, 100);
         </script>
     </body>
 </html>
